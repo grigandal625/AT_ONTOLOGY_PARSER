@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "at-ontology-parser"
+version = "0.1.0"
+description = ""
+authors = ["grigadnal625 <grigandal625@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pyyaml = "^6.0.2"
+pydantic = "^2.10.6"
+jsonschema = "^4.23.0"
+
+
+[tool.poetry.group.development.dependencies]
+pre-commit = "^4.1.0"
+pytest = "^8.3.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
