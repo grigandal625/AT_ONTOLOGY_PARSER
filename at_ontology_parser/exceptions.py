@@ -80,3 +80,7 @@ class LoadException(OntologyException):
             "errors": self.errors,
             "context": [p for p in self.context.path[1:] if isinstance(p, str) or isinstance(p, int)],
         }
+
+
+class ImportException(OntologyException):
+    pass

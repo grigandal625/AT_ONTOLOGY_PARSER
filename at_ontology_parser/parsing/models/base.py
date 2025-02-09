@@ -24,7 +24,7 @@ class OntoParseModel(BaseModel):
             return self.on_loaded(result, context=context, **kwargs)
         except ValidationError as e:
             raise LoadException(
-                f"Error while loading service template: Invalid data for {self.__class__.__name__}",
+                f"Error while loading ontology or ontology model: Invalid data for {self.__class__.__name__}",
                 context=context,
                 errors=e.errors(),
             ) from e
