@@ -2,6 +2,8 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+from pydantic import Field
+
 from at_ontology_parser.base import OntologyBase
 from at_ontology_parser.exceptions import Context
 from at_ontology_parser.model.types import RelationshipType
@@ -12,8 +14,8 @@ from at_ontology_parser.reference import OntologyReference
 
 
 class RelationshipTypeModel(InstancableModel):
-    valid_source_types: Optional[List[str]]
-    valid_target_types: Optional[List[str]]
+    valid_source_types: Optional[List[str]] = Field(default_factory=list)
+    valid_target_types: Optional[List[str]] = Field(default_factory=list)
 
     def get_preliminary_object(self, data, *, context: Context, owner: OntologyBase):
         result = RelationshipType(**data)
@@ -21,6 +23,11 @@ class RelationshipTypeModel(InstancableModel):
         return result
 
     def insert_dependent_data(self, result: RelationshipType, context: Context):
+        if result.derived_from:
+            result.derived_from = OntologyReference[RelationshipType](
+                alias=self.derived_from, context=context.create_child("derived_from", self.derived_from, result)
+            )
+            result.derived_from.owner = result
         if result.valid_source_types:
             valid_source_types = []
             for source_type in self.valid_source_types:

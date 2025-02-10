@@ -26,7 +26,7 @@ class OntologyModel(OntologyEntity):
     )
 
     def get_resolved_import(
-        self, import_definition: ImportDefinition, with_module=False
+        self, import_definition: "ImportDefinition", with_module=False
     ) -> Optional["OntologyModel" | Tuple["OntologyModel", "ModelModule"]]:
         for resolved_import in self._resolved_imports:
             if resolved_import[0] is import_definition:

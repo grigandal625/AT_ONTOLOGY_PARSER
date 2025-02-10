@@ -90,6 +90,7 @@ class OntologyBase:
 @dataclass(kw_only=True)
 class OntologyEntity(OntologyBase):
     name: str
+    label: Optional[str] = field(default=None)
     description: Optional[str] = field(default=None)
 
 

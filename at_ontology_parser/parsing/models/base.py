@@ -12,7 +12,6 @@ from pydantic import ValidationError
 from at_ontology_parser.base import OntologyBase
 from at_ontology_parser.exceptions import Context
 from at_ontology_parser.exceptions import LoadException
-from at_ontology_parser.model.types import ONTOLOGY_TYPES
 
 T = TypeVar("T")
 
@@ -45,7 +44,7 @@ class OntoParseModel(BaseModel):
         return result
 
     def _to_internal(self, *, context: Context, owner: OntologyBase, **kwargs) -> OntologyBase:
-        data = self.prepare_independent_data(context, **kwargs)
+        data = self.prepare_independent_data(context=context, **kwargs)
         result = self.get_preliminary_object(data, context=context, owner=owner)
         result = self.insert_dependent_data(result, context=context)
         return result
@@ -56,25 +55,20 @@ class OntoRootModel(RootModel[T], Generic[T]):
         raise NotImplementedError("Not implemented")
 
     def to_internal(self, *, context: Context, owner: OntologyBase, **kwargs) -> Dict[str, OntologyBase]:
-        return self._to_internal(context=context, **kwargs)
+        return self._to_internal(context=context, owner=owner, **kwargs)
 
 
 class OntologyEntityModel(OntoParseModel):
+    label: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
 
 
 class DerivableModel(OntologyEntityModel):
     derived_from: Optional[str] = Field(default=None)
-    version: Optional[str] = Field(default=None)
-    metadata: Optional[Dict[str, Any]] = Field(default=None)
 
     def on_loaded(self, result: OntologyBase, *, context: Context, **kwargs) -> OntologyBase:
-        types_mapping = ONTOLOGY_TYPES.sections()
-        for section, ToscaType in types_mapping.items():
-            if isinstance(result, ToscaType):
-                if context.parser:
-                    context.parser.register_type(section, result, context)
-                    break
+        if context.parser:
+            context.parser.register_type(result, context)
         return super().on_loaded(result, context=context, **kwargs)
 
 

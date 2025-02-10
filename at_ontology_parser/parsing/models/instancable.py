@@ -1,3 +1,5 @@
+from typing import Any
+from typing import Dict
 from typing import Optional
 
 from pydantic import Field
@@ -10,8 +12,9 @@ from at_ontology_parser.parsing.models.model.definitions.property_definition imp
 
 
 class InstancableModel(DerivableModel):
-    properties: Optional[Properties] = Field(default_factory=Properties({}))
-    artifacts: Optional[Artifacts] = Field(default_factory=Artifacts({}))
+    metadata: Optional[Dict[str, Any]] = Field(default=None)
+    properties: Optional[Properties] = Field(default_factory=lambda: Properties({}))
+    artifacts: Optional[Artifacts] = Field(default_factory=lambda: Artifacts({}))
 
     def insert_dependent_data(self, result: Instancable, context: Context):
         if result.properties:

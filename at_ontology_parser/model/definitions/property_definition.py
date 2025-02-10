@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class PropertyDefinition(Definition):
-    type: Optional[OntologyReference[DataType]] = field(default=None)
+    type: Optional["OntologyReference[DataType]"] = field(default=None)
     required: Optional[bool] = field(default=False)
     default: Optional[Any] = field(default=None, repr=False)
     allows_multiple: Optional[bool] = field(default=True)

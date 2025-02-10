@@ -5,6 +5,7 @@ from dataclasses import field
 from pathlib import Path
 from typing import Any
 from typing import Dict
+from typing import ForwardRef
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -13,13 +14,21 @@ from typing import Type
 import yaml
 from pydantic import ValidationError
 
+from at_ontology_parser.base import Derivable
+from at_ontology_parser.base import Instance
 from at_ontology_parser.base import OntologyBase
 from at_ontology_parser.exceptions import Context
 from at_ontology_parser.exceptions import ImportException
 from at_ontology_parser.exceptions import LoadException
+from at_ontology_parser.exceptions import OntologyException
 from at_ontology_parser.model import OntologyModel
 from at_ontology_parser.model.definitions import ImportDefinition
+from at_ontology_parser.model.types import ONTOLOGY_TYPES
+from at_ontology_parser.ontology.instances import ONTOLOGY_INSTANCES
 from at_ontology_parser.parsing.models.model.handler import OntologyModelModel
+from at_ontology_parser.reference import BaseReference
+from at_ontology_parser.reference import OntologyReference
+from at_ontology_parser.reference import OwnerFeatureReference
 
 
 @dataclass(kw_only=True)
@@ -30,10 +39,8 @@ class ModelModule(OntologyBase):
     parser: "Parser"
     artifacts: Dict[Path, io.IOBase] = field(init=False, repr=False, default_factory=list)
 
-    def __post_init__(self):
-        self.model.owner = self
-
     def resolve_imports(self, context: Context, import_loaders: List["ImportLoader"]):
+        self.model.owner = self
         resolved_imports: List[Tuple["ImportDefinition", "OntologyModel", "ModelModule"]] = []
         errors = []
         for i, import_def in enumerate(self.model.imports):
@@ -110,17 +117,24 @@ class ImportLoader:
 
 @dataclass(kw_only=True)
 class Parser(OntologyBase):
-    root_context: Context
-    import_loaders: List[ImportLoader]
-    ontology_model_model_class: Type[OntologyModelModel]
+    root_context: Context = field(init=False, repr=False)
+    import_loaders: List[ImportLoader] = field(init=False, repr=False)
+    ontology_model_model_class: Type[OntologyModelModel] = field(init=False, repr=False)
 
-    _modules: Dict[str, ModelModule]
+    _registered_types: Dict[str, Dict[str, Derivable]] = field(init=False, repr=False)
+    _registered_instances: Dict[str, Dict[str, Instance]] = field(init=False, repr=False)
+    _requested_references: List[BaseReference] = field(init=False, repr=False)
+
+    _modules: Dict[str, ModelModule] = field(init=False, repr=False)
 
     def __post_init__(self):
-        self.root_context = Context(name="parser", data=None, initiator=self)
+        self.root_context = Context(name="parser", data=None, initiator=self, parser=self)
         self._modules = {}
         self.ontology_model_model_class = OntologyModelModel
         self.import_loaders = [ImportLoader(self)]
+        self._registered_types = {section: {} for section in ONTOLOGY_TYPES.sections()}
+        self._registered_instances = {section: {} for section in ONTOLOGY_INSTANCES.sections()}
+        self._requested_references = []
 
     @property
     def modules(self) -> Dict[str, ModelModule]:
@@ -131,6 +145,14 @@ class Parser(OntologyBase):
 
     def get_module_by_model(self, model: OntologyModel) -> Optional[ModelModule]:
         return next(iter([m for m in self.modules.values() if m.model == model]), None)
+
+    def register_type(self, type: Derivable, context: Context):
+        section = ONTOLOGY_TYPES.class_to_section_mapping().get(type.__class__)
+        self._registered_types[section][type.name] = type
+
+    def register_instance(self, instance: Instance, context: Context):
+        section = ONTOLOGY_INSTANCES.class_to_section_mapping().get(instance.__class__)
+        self._registered_instances[section][instance.name] = instance
 
     def load_ontology_model_data(
         self,
@@ -151,18 +173,20 @@ class Parser(OntologyBase):
                 context=context,
                 errors=e.errors(),
             ) from e
-        ontology_model = ontology_model_model.to_internal(context=context)
 
         module = ModelModule(
-            model=ontology_model,
+            model=None,
             orig_name=str(orig_name),
             full_path=full_path,
             parser=self,
         )
 
+        ontology_model = ontology_model_model.to_internal(context=context, owner=module)
+        module.model = ontology_model
+
         self._modules[str(full_path)] = module
 
-        module.resolve_imports(context=context)
+        module.resolve_imports(context=context, import_loaders=self.import_loaders)
 
         return ontology_model
 
@@ -232,6 +256,76 @@ class Parser(OntologyBase):
                     if f not in result
                 ]
         return result
+
+    def request_reference(self, reference: BaseReference):
+        if not self.assign_reference(reference):
+            self._requested_references.append(reference)
+
+    def assign_reference(self, reference: BaseReference) -> bool:
+        if isinstance(reference, OntologyReference):
+            for t in reference.types:
+                cls = t
+                if isinstance(t, ForwardRef) or t.__class__ is ForwardRef:
+                    name = cls.__forward_arg__.split(".")[-1]
+                    cls = ONTOLOGY_TYPES.class_mapping().get(name)
+                section = ONTOLOGY_TYPES.class_to_section_mapping().get(cls)
+                if section:
+                    registered = self._registered_types.get(section, {})
+                    if reference.alias in registered:
+                        reference.value = registered[reference.alias]
+                        return reference.fulfilled
+                cls = t
+                if isinstance(t, ForwardRef) or t.__class__ is ForwardRef:
+                    name = cls.__forward_arg__.split(".")[-1]
+                    cls = ONTOLOGY_INSTANCES.class_mapping().get(name)
+                section = ONTOLOGY_INSTANCES.class_to_section_mapping().get(cls)
+                if section:
+                    registered = self._registered_instances.get(section, {})
+                    if reference.alias in registered:
+                        reference.value = registered[reference.alias]
+                        return reference.fulfilled
+        elif isinstance(reference, OwnerFeatureReference):
+            if reference.has_owner:
+                if not hasattr(reference, "__feature_getter__"):
+                    raise OntologyException(
+                        f"""Bad reference {reference.alias}. Expected to get __feature_getter__.
+Check, that reference is created by classmethod {reference.__class__.__name__}.create(...)""",
+                        context=reference.context,
+                    )
+                try:
+                    reference.value = reference.__feature_getter__(reference.owner, reference)
+                except Exception:
+                    pass
+        return reference.fulfilled
+
+    def finalize_references(self, context: "Context" = None) -> bool:
+        context = context or self.root_context
+        for ref in self._requested_references:
+            if not ref.fulfilled:
+                self.assign_reference(ref)
+        self._requested_references = [ref for ref in self._requested_references if not ref.finalize()]
+        errors: List[OntologyException] = []
+        for ref in self._requested_references:
+            name = ref.types[0]
+            if isinstance(name, ForwardRef) or name.__class__ is ForwardRef:
+                name = name.__forward_arg__
+            if hasattr(name, "__name__"):
+                name = name.__name__
+
+            errors.append(
+                OntologyException(
+                    f'Unknown reference "{ref.alias}" to {name}',
+                    context=context,
+                )
+            )
+
+        if errors:
+            raise LoadException(
+                "Failed to load service template: Bad references",
+                context=context,
+                errors=[e.represent() for e in errors],
+            )
+        return True
 
     @staticmethod
     def open_file_auto_mode(file_path: str | Path):

@@ -16,6 +16,11 @@ class InstanceModel(OntologyEntityModel):
     properties: Optional[PropertyAssignments] = Field(default_factory=lambda: PropertyAssignments([]))
     artifacts: Optional[ArtifactAssigments] = Field(default_factory=lambda: ArtifactAssigments([]))
 
+    def on_loaded(self, result: Instance, *, context: Context, **kwargs) -> Instance:
+        if context.parser:
+            context.parser.register_instance(result, context)
+        return super().on_loaded(result, context=context, **kwargs)
+
     def insert_dependent_data(self, result: Instance, context: Context):
         if result.properties:
             result.properties = self.properties.to_internal(

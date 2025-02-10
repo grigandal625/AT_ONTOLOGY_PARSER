@@ -12,6 +12,7 @@ from at_ontology_parser.parsing.models.ontology.instances.vertex import Vertices
 
 
 class OntologyHandlerModel(OntologyEntityModel):
+    name: str
     imports: Optional[Imports] = Field(default_factory=lambda: Imports([]))
     vertices: Optional[Vertices] = Field(default_factory=lambda: Vertices({}))
     relationships: Optional[Relationships] = Field(default_factory=lambda: Relationships({}))

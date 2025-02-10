@@ -5,6 +5,7 @@ from at_ontology_parser.exceptions import Context
 from at_ontology_parser.model.types import VertexType
 from at_ontology_parser.parsing.models.base import OntoRootModel
 from at_ontology_parser.parsing.models.instancable import InstancableModel
+from at_ontology_parser.reference import OntologyReference
 
 
 class VertexTypeModel(InstancableModel):
@@ -12,6 +13,14 @@ class VertexTypeModel(InstancableModel):
         result = VertexType(**data)
         result.owner = owner
         return result
+
+    def insert_dependent_data(self, result: VertexType, context: Context):
+        if result.derived_from:
+            result.derived_from = OntologyReference[VertexType](
+                alias=self.derived_from, context=context.create_child("derived_from", self.derived_from, result)
+            )
+            result.derived_from.owner = result
+        return super().insert_dependent_data(result, context)
 
 
 class VertexTypes(OntoRootModel[Dict[str, VertexTypeModel]]):

@@ -12,6 +12,7 @@ from at_ontology_parser.parsing.models.model.types.vertex_type import VertexType
 
 
 class OntologyModelModel(OntologyEntityModel):
+    name: str
     data_types: Optional[DataTypes] = Field(default_factory=lambda: DataTypes({}))
     vertex_types: Optional[VertexTypes] = Field(default_factory=lambda: VertexTypes({}))
     relationship_types: Optional[RelationshipTypes] = Field(default_factory=lambda: RelationshipTypes({}))
