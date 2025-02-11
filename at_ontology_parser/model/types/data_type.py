@@ -18,4 +18,4 @@ class DataType(Derivable):
 
     @property
     def object_schema_ref_used(self) -> bool:
-        return self.object_schema_resolved is self.object_schema and self.object_schema is not None
+        return self.object_schema_resolved is not self.object_schema
