@@ -24,6 +24,7 @@ from at_ontology_parser.exceptions import OntologyException
 from at_ontology_parser.model import OntologyModel
 from at_ontology_parser.model.definitions import ImportDefinition
 from at_ontology_parser.model.types import ONTOLOGY_TYPES
+from at_ontology_parser.ontology.handler import Ontology
 from at_ontology_parser.ontology.instances import ONTOLOGY_INSTANCES
 from at_ontology_parser.parsing.models.model.handler import OntologyModelModel
 from at_ontology_parser.reference import BaseReference
@@ -62,16 +63,54 @@ class ModelModule(OntologyBase):
                     context=context.create_child(i, import_def, self),
                     errors=errors,
                 )
+        self.model._resolved_imports = resolved_imports
+
+
+@dataclass(kw_only=True)
+class OntologyModule(OntologyBase):
+    ontology: Ontology = field(repr=False)
+    full_path: Path
+    orig_name: str
+    parser: "Parser"
+    artifacts: Dict[Path, io.IOBase] = field(init=False, repr=False, default_factory=list)
+
+    def resolve_imports(self, context: Context, import_loaders: List["ImportLoader"]):
+        self.ontology.owner = self
+        resolved_imports: List[Tuple["ImportDefinition", "OntologyModel", "ModelModule"]] = []
+        errors = []
+        for i, import_def in enumerate(self.ontology.imports):
+            success = False
+            for import_loader in import_loaders:
+                try:
+                    resolved_module = import_loader.resolve_import(
+                        source_module=self, import_def=import_def, context=context.create_child(i, import_def, self)
+                    )
+                    success = True
+                    resolved_imports.append((import_def, resolved_module.model, resolved_module))
+                    break
+                except ImportException as e:
+                    errors.append(e.represent())
+
+            if not success:
+                raise LoadException(
+                    f'Error while loading ontology or ontology model: Bad import "{import_def.file}"',
+                    context=context.create_child(i, import_def, self),
+                    errors=errors,
+                )
+        self.ontology._resolved_imports = resolved_imports
 
 
 class ImportLoader:
     def __init__(self, *args, **kwargs):
         pass
 
-    def resolve_import(self, source_module: ModelModule, import_def: ImportDefinition, context: Context) -> ModelModule:
-        orig_module = source_module.parser.get_module_by_orig_name(import_def.file)
-        if orig_module:
-            return orig_module
+    def resolve_import(
+        self, source_module: ModelModule | OntologyModule, import_def: ImportDefinition, context: Context
+    ) -> ModelModule:
+        if isinstance(source_module, ModelModule):
+            orig_module = source_module.parser.get_module_by_orig_name(import_def.file)
+            if orig_module:
+                return orig_module
         import_path = Path(import_def.file)
 
         orig_name = import_path
@@ -81,7 +120,7 @@ class ImportLoader:
             import_path = dir_path / import_path
             orig_name = None
 
-        if str(import_path) in source_module.parser._modules:
+        if isinstance(source_module, ModelModule) and str(import_path) in source_module.parser._modules:
             return source_module.parser.modules[str(import_path)]
 
         if not import_path.exists():
