@@ -27,6 +27,7 @@ from at_ontology_parser.model.types import ONTOLOGY_TYPES
 from at_ontology_parser.ontology.handler import Ontology
 from at_ontology_parser.ontology.instances import ONTOLOGY_INSTANCES
 from at_ontology_parser.parsing.models.model.handler import OntologyModelModel
+from at_ontology_parser.parsing.models.ontology.handler import OntologyHandlerModel
 from at_ontology_parser.reference import BaseReference
 from at_ontology_parser.reference import OntologyReference
 from at_ontology_parser.reference import OwnerFeatureReference
@@ -159,6 +160,7 @@ class Parser(OntologyBase):
     root_context: Context = field(init=False, repr=False)
     import_loaders: List[ImportLoader] = field(init=False, repr=False)
     ontology_model_model_class: Type[OntologyModelModel] = field(init=False, repr=False)
+    ontology_handler_model_class: Type[OntologyHandlerModel] = field(init=False, repr=False)
 
     _registered_types: Dict[str, Dict[str, Derivable]] = field(init=False, repr=False)
     _registered_instances: Dict[str, Dict[str, Instance]] = field(init=False, repr=False)
@@ -170,6 +172,7 @@ class Parser(OntologyBase):
         self.root_context = Context(name="parser", data=None, initiator=self, parser=self)
         self._modules = {}
         self.ontology_model_model_class = OntologyModelModel
+        self.ontology_handler_model_class = OntologyHandlerModel
         self.import_loaders = [ImportLoader(self)]
         self._registered_types = {section: {} for section in ONTOLOGY_TYPES.sections()}
         self._registered_instances = {section: {} for section in ONTOLOGY_INSTANCES.sections()}
@@ -208,7 +211,7 @@ class Parser(OntologyBase):
             ontology_model_model = self.ontology_model_model_class(**data)
         except ValidationError as e:
             raise LoadException(
-                "Error while loading service template: Invalid data",
+                "Error while loading ontology model: Invalid data",
                 context=context,
                 errors=e.errors(),
             ) from e
@@ -264,6 +267,40 @@ class Parser(OntologyBase):
                 context=context,
                 errors=[str(e)],
             ) from e
+
+    def load_ontology_data(
+        self,
+        data: Dict[str, Any],
+        orig_name: str,
+        full_path: str,
+        context: Context = None,
+    ) -> Ontology:
+        context = context or self.root_context
+
+        full_path = Path(full_path)
+
+        try:
+            ontology_handler_model = self.ontology_handler_model_class(**data)
+        except ValidationError as e:
+            raise LoadException(
+                "Error while loading ontology: Invalid data",
+                context=context,
+                errors=e.errors(),
+            ) from e
+
+        module = OntologyModule(
+            ontology=None,
+            orig_name=str(orig_name),
+            full_path=full_path,
+            parser=self,
+        )
+
+        ontology = ontology_handler_model.to_internal(context=context, owner=module)
+        module.ontology = ontology
+
+        module.resolve_imports(context=context, import_loaders=self.import_loaders)
+
+        return ontology
 
     def _bypass_imports(
         self, model: OntologyModel, parent_path: Path, skip_non_path: bool = True, _watched: List[OntologyModel] = None

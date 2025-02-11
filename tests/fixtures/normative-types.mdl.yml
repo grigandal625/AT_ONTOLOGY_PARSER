@@ -33,6 +33,16 @@ data_types:
     label: Временная метка
     description: Тип данных для представления временных меток
     derived_from: at_ontology.data_types.Integer
+  at_ontology.data_types.List:
+    label: Список
+    description: Тип данных для представления списков
+    derived_from: at_ontology.data_types.Root
+    object_schema: $list
+  at_ontology.data_types.Map:
+    label: Словарь
+    description: Тип данных для хранения пар "ключ-значение"
+    derived_from: at_ontology.data_types.Root
+    object_schema: $map
 
 vertex_types:
   at_ontology.vertex_types.Root:
@@ -49,4 +59,8 @@ relationship_types:
 schema_definitions:
   $string:
     type: string
+  $list:
+    type: array
+  $map:
+    type: object
   
