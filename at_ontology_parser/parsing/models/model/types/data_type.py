@@ -18,11 +18,13 @@ from at_ontology_parser.reference import OntologyReference
 
 class DataTypeModel(DerivableModel):
     constraints: Optional[Constraints] = Field(default_factory=lambda: Constraints([]))
-    object_schema: Optional[Dict[str, Any]] = Field(default=None)
+    object_schema: Optional[Dict[str, Any] | str] = Field(default=None)
 
     @model_validator(mode="before")
     def validate_object_schema(cls, values: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         if values.get("object_schema"):
+            if isinstance(values.get("object_schema"), str) and values.get("object_schema").startswith("$"):
+                return values
             try:
                 Draft7Validator.check_schema(values["object_schema"])
             except SchemaError as e:
@@ -48,6 +50,9 @@ class DataTypeModel(DerivableModel):
 
 
 class DataTypes(OntoRootModel[Dict[str, DataTypeModel]]):
+    def to_internal(self, *, context: Context, owner: OntologyBase, **kwargs) -> Dict[str, DataType]:
+        return super().to_internal(context=context, owner=owner, **kwargs)
+
     def _to_internal(self, *, context: Context, owner: OntologyBase, **kwargs) -> Dict[str, DataType]:
         return {
             key: data_type.to_internal(context=context.create_child(key, data_type), owner=owner, name=key)

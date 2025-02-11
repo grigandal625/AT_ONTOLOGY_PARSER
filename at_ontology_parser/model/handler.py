@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from dataclasses import field
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -20,6 +21,7 @@ class OntologyModel(OntologyEntity):
     data_types: Dict[str, "DataType"] = field(default_factory=dict, repr=False)
     vertex_types: Dict[str, "VertexType"] = field(default_factory=dict, repr=False)
     relationship_types: Dict[str, "RelationshipType"] = field(default_factory=dict, repr=False)
+    schema_definitions: Optional[Dict[str, Any]] = field(default_factory=dict, repr=False)
 
     _resolved_imports: Optional[List[Tuple["ImportDefinition", "OntologyModel", "ModelModule"]]] = field(
         init=False, default=None

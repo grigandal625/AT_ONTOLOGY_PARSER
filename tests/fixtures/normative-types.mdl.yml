@@ -1,5 +1,6 @@
 name: normative-types
 description: Базовые типы данных, вершин и связей, от которых должны наследоваться любые другие
+
 data_types:
   at_ontology.data_types.Root:
     label: Базовый абстрактный тип данных
@@ -9,8 +10,7 @@ data_types:
     label: Строка
     description: Тип данных для представления строковой информации
     derived_from: at_ontology.data_types.Root
-    object_schema:
-      type: string
+    object_schema: $string
   at_ontology.data_types.Integer:
     label: Целое число
     description: Тип данных для представления целочисленных значений
@@ -33,14 +33,20 @@ data_types:
     label: Временная метка
     description: Тип данных для представления временных меток
     derived_from: at_ontology.data_types.Integer
+
 vertex_types:
   at_ontology.vertex_types.Root:
     label: Базовый абстрактный тип вершины
     description: Базовый тип вершины, от которого должны наследоваться остальные
     abstract: true
+
 relationship_types:
   at_ontology.relationship_types.Root:
     label: Базовый абстрактный тип связи
     description: Базовый тип связи, от которого должны наследоваться остальные
     abstract: true
+
+schema_definitions:
+  $string:
+    type: string
   
