@@ -186,7 +186,7 @@ class Parser(OntologyBase):
         return next(iter([m for m in self.modules.values() if m.orig_name == orig_name]), None)
 
     def get_module_by_model(self, model: OntologyModel) -> Optional[ModelModule]:
-        return next(iter([m for m in self.modules.values() if m.model == model]), None)
+        return next(iter([m for m in self.modules.values() if m.model is model]), None)
 
     def register_type(self, type: Derivable, context: Context):
         section = ONTOLOGY_TYPES.class_to_section_mapping().get(type.__class__)

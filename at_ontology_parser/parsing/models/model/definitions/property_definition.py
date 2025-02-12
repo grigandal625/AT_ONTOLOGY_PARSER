@@ -18,6 +18,7 @@ class PropertyDefinitionModel(DefinitionModel):
     required: Optional[bool] = Field(default=False)
     default: Optional[Any] = Field(default=None)
     allows_multiple: Optional[bool] = Field(default=True)
+    initializable: Optional[bool] = Field(default=True)
     min_assignments: Optional[int] = Field(default=None)
     max_assignments: Optional[int] = Field(default=None)
 

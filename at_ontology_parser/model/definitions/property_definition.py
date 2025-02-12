@@ -16,6 +16,7 @@ class PropertyDefinition(Definition):
     type: Optional["OntologyReference[DataType]"] = field(default=None)
     required: Optional[bool] = field(default=False)
     default: Optional[Any] = field(default=None, repr=False)
+    initializable: Optional[bool] = field(default=True)
     allows_multiple: Optional[bool] = field(default=True)
     min_assignments: Optional[int] = field(default=None)
     max_assignments: Optional[int] = field(default=None)

@@ -12,9 +12,27 @@ def normative_types():
     return fixtures_dir / "normative-types.mdl.yml"
 
 
-def test_parse_file(normative_types):
+@pytest.fixture
+def course_discipline_types():
+    return fixtures_dir / "course-discipline-types.mdl.yml"
+
+
+def test_parse_models_imperatively(normative_types, course_discipline_types):
     parser = Parser()
     model = parser.load_model_yaml_file(normative_types)
     parser.finalize_references()
     assert model.name == "normative-types"
     assert len(parser._modules) == 1
+
+    model = parser.load_model_yaml_file(course_discipline_types)
+    parser.finalize_references()
+    assert model.name == "course-discipline-types"
+    assert len(parser._modules) == 2
+
+
+def test_parse_models_simple(course_discipline_types):
+    parser = Parser()
+    model = parser.load_model_yaml_file(course_discipline_types)
+    parser.finalize_references()
+    assert model.name == "course-discipline-types"
+    assert len(parser._modules) == 2

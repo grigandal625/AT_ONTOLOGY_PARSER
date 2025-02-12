@@ -44,6 +44,25 @@ data_types:
     derived_from: at_ontology.data_types.Root
     object_schema: $map
 
+  at_ontology.data_types.Reflexivity:
+    derived_from: at_ontology.data_types.String
+    label: Рефлексивность
+    description: Тип даных для хранения значения рефлексивности связи
+    constraints:
+      - included: [reflexive, non-reflexive, anti-reflexive]
+  at_ontology.data_types.Symmetry:
+    derived_from: at_ontology.data_types.String
+    label: Симметричность
+    description: Тип даных для хранения значения симметричности связи
+    constraints:
+      - included: [symmetric, non-symmetric, anti-symmetric]
+  at_ontology.data_types.Transitivity:
+    derived_from: at_ontology.data_types.String
+    label: Транзитивность
+    description: Тип даных для хранения значения транзитивности связи
+    constraints:
+      - included: [transitive, non-transitive, anti-transitive]
+
 vertex_types:
   at_ontology.vertex_types.Root:
     label: Базовый абстрактный тип вершины
@@ -55,6 +74,25 @@ relationship_types:
     label: Базовый абстрактный тип связи
     description: Базовый тип связи, от которого должны наследоваться остальные
     abstract: true
+    properties:
+      reflexivity:
+        type: at_ontology.data_types.Reflexivity
+        description: Свойство рефлексивности связи
+        initializable: false
+        default: non-reflexive
+        allows_multiple: false
+      symmetry:
+        type: at_ontology.data_types.Symmetry
+        description: Свойство симметричности связи
+        initializable: false
+        default: non-symmetric
+        allows_multiple: false
+      transitivity:
+        type: at_ontology.data_types.Transitivity
+        description: Свойство транзитивности связи
+        initializable: false
+        default: non-transitive
+        allows_multiple: false
 
 schema_definitions:
   $string:

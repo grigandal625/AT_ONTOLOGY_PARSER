@@ -13,6 +13,7 @@ from at_ontology_parser.exceptions import Context
 from at_ontology_parser.exceptions import LoadException
 from at_ontology_parser.model.handler import OntologyModel
 from at_ontology_parser.parsing.models.base import OntologyEntityModel
+from at_ontology_parser.parsing.models.model.definitions.import_definition import Imports
 from at_ontology_parser.parsing.models.model.types.data_type import DataTypes
 from at_ontology_parser.parsing.models.model.types.relationship_type import RelationshipTypes
 from at_ontology_parser.parsing.models.model.types.vertex_type import VertexTypes
@@ -20,6 +21,7 @@ from at_ontology_parser.parsing.models.model.types.vertex_type import VertexType
 
 class OntologyModelModel(OntologyEntityModel):
     name: str
+    imports: Optional[Imports] = Field(default_factory=lambda: Imports([]))
     data_types: Optional[DataTypes] = Field(default_factory=lambda: DataTypes({}))
     vertex_types: Optional[VertexTypes] = Field(default_factory=lambda: VertexTypes({}))
     relationship_types: Optional[RelationshipTypes] = Field(default_factory=lambda: RelationshipTypes({}))
@@ -43,6 +45,11 @@ class OntologyModelModel(OntologyEntityModel):
         return result
 
     def insert_dependent_data(self, result: OntologyModel, context: Context):
+        if result.imports:
+            result.imports = self.imports.to_internal(
+                context=context.create_child("imports", self.imports, result),
+                owner=result,
+            )
         if result.data_types:
             result.data_types = self.data_types.to_internal(
                 context=context.create_child("data_types", self.data_types, result), owner=result
