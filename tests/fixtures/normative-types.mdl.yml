@@ -39,7 +39,7 @@ data_types:
     derived_from: at_ontology.data_types.Root
     object_schema: $list
   at_ontology.data_types.Map:
-    label: Словарь
+    label: Объект
     description: Тип данных для хранения пар "ключ-значение"
     derived_from: at_ontology.data_types.Root
     object_schema: $map
@@ -49,19 +49,28 @@ data_types:
     label: Рефлексивность
     description: Тип даных для хранения значения рефлексивности связи
     constraints:
-      - included: [reflexive, non-reflexive, anti-reflexive]
+      - included: 
+        - reflexive
+        - non-reflexive
+        - anti-reflexive]
   at_ontology.data_types.Symmetry:
     derived_from: at_ontology.data_types.String
     label: Симметричность
     description: Тип даных для хранения значения симметричности связи
     constraints:
-      - included: [symmetric, non-symmetric, anti-symmetric]
+      - included: 
+        - symmetric
+        - non-symmetric
+        - anti-symmetric
   at_ontology.data_types.Transitivity:
     derived_from: at_ontology.data_types.String
     label: Транзитивность
     description: Тип даных для хранения значения транзитивности связи
     constraints:
-      - included: [transitive, non-transitive, anti-transitive]
+      - included: 
+        - transitive
+        - non-transitive
+        - anti-transitive
 
 vertex_types:
   at_ontology.vertex_types.Root:
