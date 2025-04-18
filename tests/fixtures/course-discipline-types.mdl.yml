@@ -28,8 +28,10 @@ relationship_types:
     derived_from: at_ontology.relationship_types.Root
     label: Иерархическая связь 
     description: Тип связи для представления иерархических связей между элементами курса/дисциплины
-    valid_source_types: [course_discipline.vertex_types.CourseElement]
-    valid_target_types: [course_discipline.vertex_types.CourseElement]
+    valid_source_types: 
+      - course_discipline.vertex_types.CourseElement
+    valid_target_types: 
+      - course_discipline.vertex_types.CourseElement
     properties:
       reflexivity:
         type: at_ontology.data_types.Reflexivity
