@@ -7,10 +7,10 @@ imports:
 vertices:
   Vertex1:
     label: Тема 1
-    type: course_discipline.vertex_types.CourseElement
+    type: CourceDiscipline.vertex_types.CourseElement
   Vertex2:
     label: Тема 2
-    type: course_discipline.vertex_types.CourseElement
+    type: CourceDiscipline.vertex_types.CourseElement
     properties:
       questions:
         - question: Вопрос 1
