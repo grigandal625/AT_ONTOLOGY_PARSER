@@ -14,7 +14,7 @@ vertex_types:
 
   CourceDiscipline.vertex_types.CourseElement:
     derived_from: ATOntology.vertex_types.Root
-    label: Элемент курса/дисциплины
+    label: Vo - элемент курса/дисциплины
     description: Тип вершины для представления простых/сложных понятий, описывающих элементы курса/дисциплины
     properties:
       questions:
@@ -22,11 +22,29 @@ vertex_types:
         required: false
         allow_multiple: true
 
+  CourceDiscipline.vertex_types.Competence:
+    derived_from: ATOntology.vertex_types.Root
+    label: Ko - компетенция
+    description: Тип вершины для представления компетенции
+    properties:
+      code:
+        type: ATOntology.data_types.String
+        description: Код компетенции
+        initializable: true
+        required: true
+        allows_multiple: false
+      description:
+        type: ATOntology.data_types.String
+        description: Описание компетенции из УМКД
+        initializable: true
+        required: true
+        allows_multiple: false
+
 relationship_types:
 
   CourceDiscipline.relationship_types.Hierarchy:
     derived_from: ATOntology.relationship_types.Root
-    label: Иерархическая связь 
+    label: C - иерархическая связь 
     description: Тип связи для представления иерархических связей между элементами курса/дисциплины
     valid_source_types: 
       - CourceDiscipline.vertex_types.CourseElement
@@ -51,7 +69,152 @@ relationship_types:
         initializable: false
         default: non-transitive # возможно anti-transitive
         allows_multiple: false
+        
+  CourceDiscipline.relationship_types.Agregation:
+    derived_from: ATOntology.relationship_types.Root
+    label: R1 - аггрегация (часть-целое) 
+    description: Тип связи «часть-целое» (агрегация), показывает, что понятие дочерней вершины является частью составного понятия родительской вершины
+    valid_source_types: 
+      - CourceDiscipline.vertex_types.CourseElement
+    valid_target_types: 
+      - CourceDiscipline.vertex_types.CourseElement
+    properties:
+      reflexivity:
+        type: ATOntology.data_types.Reflexivity
+        description: Свойство рефлексивности связи
+        initializable: false
+        default: anti-reflexive
+        allows_multiple: false
+      symmetry:
+        type: ATOntology.data_types.Symmetry
+        description: Свойство симметричности связи
+        initializable: false
+        default: anti-symmetric
+        allows_multiple: false
+      transitivity:
+        type: ATOntology.data_types.Transitivity
+        description: Свойство транзитивности связи
+        initializable: false
+        default: transitive
+        allows_multiple: false
 
+  CourceDiscipline.relationship_types.Association:
+    derived_from: ATOntology.relationship_types.Root
+    label: R2 - ассоциация (средняя) 
+    description: Тип связи «ассоциация» (средняя), означает, что для владения понятием родительской вершины необходимо владеть понятием дочерней вершины
+    valid_source_types: 
+      - CourceDiscipline.vertex_types.CourseElement
+    valid_target_types: 
+      - CourceDiscipline.vertex_types.CourseElement
+    properties:
+      reflexivity:
+        type: ATOntology.data_types.Reflexivity
+        description: Свойство рефлексивности связи
+        initializable: false
+        default: anti-reflexive
+        allows_multiple: false
+      symmetry:
+        type: ATOntology.data_types.Symmetry
+        description: Свойство симметричности связи
+        initializable: false
+        default: non-symmetric
+        allows_multiple: false
+      transitivity:
+        type: ATOntology.data_types.Transitivity
+        description: Свойство транзитивности связи
+        initializable: false
+        default: transitive
+        allows_multiple: false
+
+  CourceDiscipline.relationship_types.Weak:
+    derived_from: ATOntology.relationship_types.Root
+    label: R3 - слабая
+    description: Тип связи «слабая», означает, что для владения понятием родительской вершины владение понятием дочерней вершины желательно, но не является необходимым
+    valid_source_types: 
+      - CourceDiscipline.vertex_types.CourseElement
+    valid_target_types: 
+      - CourceDiscipline.vertex_types.CourseElement
+    properties:
+      reflexivity:
+        type: ATOntology.data_types.Reflexivity
+        description: Свойство рефлексивности связи
+        initializable: false
+        default: anti-reflexive
+        allows_multiple: false
+      symmetry:
+        type: ATOntology.data_types.Symmetry
+        description: Свойство симметричности связи
+        initializable: false
+        default: non-symmetric
+        allows_multiple: false
+      transitivity:
+        type: ATOntology.data_types.Transitivity
+        description: Свойство транзитивности связи
+        initializable: false
+        default: non-transitive
+        allows_multiple: false
+
+  CourceDiscipline.relationship_types.CompetenceHierarchy:
+    derived_from: ATOntology.relationship_types.Root
+    label: CK - иерархическая связь между компетенциями
+    description: Тип для описания иерархических связей между компетенциями
+    valid_source_types: 
+      - CourceDiscipline.vertex_types.Competence
+    valid_target_types: 
+      - CourceDiscipline.vertex_types.Competence
+    properties:
+      reflexivity:
+        type: ATOntology.data_types.Reflexivity
+        description: Свойство рефлексивности связи
+        initializable: false
+        default: anti-reflexive
+        allows_multiple: false
+      symmetry:
+        type: ATOntology.data_types.Symmetry
+        description: Свойство симметричности связи
+        initializable: false
+        default: anti-symmetric
+        allows_multiple: false
+      transitivity:
+        type: ATOntology.data_types.Transitivity
+        description: Свойство транзитивности связи
+        initializable: false
+        default: non-transitive
+        allows_multiple: false
+
+  CourceDiscipline.relationship_types.CompetenceToElement:
+    derived_from: ATOntology.relationship_types.Root
+    label: RK - связь между компетенцией и элементом курса/дисциплины
+    description: Тип для описания взвешенных связей между компетенцей и элементом курса/дисциплины
+    valid_source_types: 
+      - CourceDiscipline.vertex_types.Competence
+    valid_target_types: 
+      - CourceDiscipline.vertex_types.CourseElement
+    properties:
+      weight:
+        type: ATOntology.data_types.Float
+        description: Вес связи
+        initializable: true
+        required: true
+        allows_multiple: false
+      reflexivity:
+        type: ATOntology.data_types.Reflexivity
+        description: Свойство рефлексивности связи
+        initializable: false
+        default: anti-reflexive
+        allows_multiple: false
+      symmetry:
+        type: ATOntology.data_types.Symmetry
+        description: Свойство симметричности связи
+        initializable: false
+        default: anti-symmetric
+        allows_multiple: false
+      transitivity:
+        type: ATOntology.data_types.Transitivity
+        description: Свойство транзитивности связи
+        initializable: false
+        default: anti-transitive
+        allows_multiple: false
 
 schema_definitions:
 
@@ -91,5 +254,3 @@ schema_definitions:
                     const: false
                 required:
                   - correct
-    
-
