@@ -52,7 +52,7 @@ data_types:
       - included: 
         - reflexive
         - non-reflexive
-        - anti-reflexive]
+        - anti-reflexive
   ATOntology.data_types.Symmetry:
     derived_from: ATOntology.data_types.String
     label: Симметричность
