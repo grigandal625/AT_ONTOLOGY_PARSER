@@ -40,6 +40,8 @@ class ModelModule(OntologyBase):
     orig_name: str
     parser: "Parser"
     artifacts: Dict[Path, io.IOBase] = field(init=False, repr=False, default_factory=list)
+    context: Context = field(repr=False)
+    _meta: Dict[str, Any] = field(init=False, repr=False, default_factory=dict)
 
     def resolve_imports(self, context: Context, import_loaders: List["ImportLoader"]):
         self.model.owner = self
@@ -74,6 +76,8 @@ class OntologyModule(OntologyBase):
     orig_name: str
     parser: "Parser"
     artifacts: Dict[Path, io.IOBase] = field(init=False, repr=False, default_factory=list)
+    context: Context = field(repr=False)
+    _meta: Dict[str, Any] = field(init=False, repr=False, default_factory=dict)
 
     def resolve_imports(self, context: Context, import_loaders: List["ImportLoader"]):
         self.ontology.owner = self
@@ -221,6 +225,7 @@ class Parser(OntologyBase):
             orig_name=str(orig_name),
             full_path=full_path,
             parser=self,
+            context=context,
         )
 
         ontology_model = ontology_model_model.to_internal(context=context, owner=module)
@@ -293,6 +298,7 @@ class Parser(OntologyBase):
             orig_name=str(orig_name),
             full_path=full_path,
             parser=self,
+            context=context,
         )
 
         ontology = ontology_handler_model.to_internal(context=context, owner=module)
