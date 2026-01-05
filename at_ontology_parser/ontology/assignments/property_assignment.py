@@ -15,6 +15,14 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class PropertyAssignment(OntologyBase):
-    id: str | int = field(default_factory=lambda: str(uuid4()))
+    id: str | int = field(default=None)
     property: "OwnerFeatureReference[PropertyDefinition, Instance]" = field(repr=False)
     value: Any = field(repr=False)
+
+    def _to_repr(self, context, minify=True, exclude_name=True):
+        if minify and not self.id:
+            return self.value
+        return {
+            "id": self.id or str(uuid4()),
+            "value": self.value,
+        }

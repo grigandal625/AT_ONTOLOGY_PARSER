@@ -13,8 +13,8 @@ from at_ontology_parser.parsing.models.ontology.assignments.property_assignment 
 class InstanceModel(OntologyEntityModel):
     type: str
     metadata: Optional[Any] = Field(default=None)
-    properties: Optional[PropertyAssignments] = Field(default_factory=lambda: PropertyAssignments([]))
-    artifacts: Optional[ArtifactAssigments] = Field(default_factory=lambda: ArtifactAssigments([]))
+    properties: Optional[PropertyAssignments] = Field(default_factory=lambda: PropertyAssignments({}))
+    artifacts: Optional[ArtifactAssigments] = Field(default_factory=lambda: ArtifactAssigments({}))
 
     def on_loaded(self, result: Instance, *, context: Context, **kwargs) -> Instance:
         if context.parser:

@@ -9,3 +9,8 @@ from at_ontology_parser.base import OntologyBase
 class ImportDefinition(OntologyBase):
     file: str
     alias: Optional[str] = field(default=None)
+
+    def _to_repr(self, context, minify=True, exclude_name=True):
+        if self.alias:
+            return {self.alias: self.file}
+        return self.file

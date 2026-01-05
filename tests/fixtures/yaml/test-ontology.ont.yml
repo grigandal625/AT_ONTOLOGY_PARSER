@@ -2,7 +2,7 @@ name: test-ontology
 description: Тестовая онтология
 
 imports:
-  - cource-discipline-types.mdl.yml
+  - course-discipline-types.mdl.yml
 
 vertices:
   Vertex1:

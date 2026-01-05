@@ -2,7 +2,6 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
-from uuid import uuid4
 
 from pydantic import Field
 
@@ -17,14 +16,14 @@ from at_ontology_parser.reference import OwnerFeatureReference
 
 
 def get_property_definition_from_type(
-    owner: Instance, ref: OwnerFeatureReference[PropertyDefinition, Instance]
+    owner: PropertyAssignment, ref: OwnerFeatureReference[PropertyDefinition, Instance]
 ) -> PropertyDefinition:
-    if owner._built and owner.type.fulfilled and owner.type.value._built:
-        return owner.type.value.properties.get(ref.alias)
+    if owner._built and owner.has_owner and isinstance(owner.owner, Instance) and owner.owner.type.fulfilled:
+        return owner.owner.type.value.properties.get(ref.alias)
 
 
 class PreliminaryPropertyAssignmentModel(OntoParseModel):
-    id: Optional[str | int] = Field(default_factory=lambda: str(uuid4()))
+    id: Optional[str | int] = Field(default=None)
     value: Any
 
 
@@ -51,25 +50,37 @@ class PropertyAssignmentModel(PreliminaryPropertyAssignmentModel):
 
 
 class PropertyAssignments(
-    OntoRootModel[
-        List[Dict[str, Any | PreliminaryPropertyAssignmentModel] | PropertyAssignmentModel]
-        | Dict[str, Any | PreliminaryPropertyAssignmentModel]
-    ]
+    OntoRootModel[Dict[str, List[PreliminaryPropertyAssignmentModel | Any] | PreliminaryPropertyAssignmentModel | Any]]
 ):
     def _to_internal(self, *, context: Context, owner: OntologyBase, **kwargs) -> List[PropertyAssignment]:
         result = []
         root = self.root
-        if isinstance(root, dict):
-            root = [{key: value} for key, value in root.items()]
-        for i, prop_assignment in enumerate(root):
-            prop = prop_assignment
-            if not isinstance(prop_assignment, PropertyAssignmentModel):
-                property = next(iter(prop_assignment.keys()))
-                value = prop_assignment[property]
-                id = None
-                if isinstance(value, PreliminaryPropertyAssignmentModel):
-                    id = value.id
-                    value = value.value
-                prop = PropertyAssignmentModel(property=property, value=value, id=id)
-            result.append(prop.to_internal(context=context.create_child(i, data=prop), owner=owner))
+        for property, prop_assignment in root.items():
+            if isinstance(prop_assignment, list):
+                result += [
+                    self._get_prop(property, assignment, context.create_child(i, assignment, self), owner)
+                    for i, assignment in enumerate(prop_assignment)
+                ]
+            else:
+                result.append(self._get_prop(property, prop_assignment, context, owner))
         return result
+
+    def _get_prop(
+        self,
+        property: str,
+        prop_assignment: PreliminaryPropertyAssignmentModel | Any,
+        context: Context,
+        owner: OntologyBase,
+    ) -> PropertyAssignment:
+        if not isinstance(prop_assignment, PreliminaryPropertyAssignmentModel):
+            return PropertyAssignmentModel(property=property, value=prop_assignment).to_internal(
+                context=context.create_child(property, prop_assignment, initiator=self),
+                owner=owner,
+            )
+        else:
+            return PropertyAssignmentModel(
+                property=property, value=prop_assignment.value, id=prop_assignment.id
+            ).to_internal(
+                context=context.create_child(property, prop_assignment, initiator=self),
+                owner=owner,
+            )

@@ -9,6 +9,7 @@ from typing import Self
 from typing import TYPE_CHECKING
 
 from at_ontology_parser.exceptions import Context
+from at_ontology_parser.exceptions import OntologyException
 
 if TYPE_CHECKING:
     from at_ontology_parser.reference import OntologyReference
@@ -117,3 +118,69 @@ class Instance(OntologyEntity):
     metadata: Optional[dict] = field(default=None)
     properties: Optional[List["PropertyAssignment"]] = field(default=None)
     artifacts: Optional[List["ArtifactAssignment"]] = field(default=None)
+
+    def _to_repr(self, context: "Context", minify=True, exclude_name=True):
+        result = super()._to_repr(context, minify, exclude_name)
+
+        result["properties"] = self._represent_properties(
+            context=context.create_child("properties"), minify=minify, exclude_name=exclude_name
+        )
+        result["artifacts"] = self._represent_artifacts(
+            context=context.create_child("artifacts"), minify=minify, exclude_name=exclude_name
+        )
+        return result
+
+    def _represent_properties(self, context: "Context", minify=True, exclude_name=True):
+        if not self.properties:
+            return {}
+        result = {}
+
+        for prop in self.properties:
+            if prop.property.alias in result:
+                if not prop.property.value.allows_multiple:
+                    raise OntologyException(
+                        "Unexpected repeated property assignment", context=context.create_child(prop.property.alias)
+                    )
+                result[prop.property.alias].append(
+                    prop.to_representation(
+                        context=context.create_child(prop.property.alias), minify=minify, exclude_name=exclude_name
+                    )
+                )
+            elif prop.property.value.allows_multiple:
+                result[prop.property.alias] = [
+                    prop.to_representation(
+                        context=context.create_child(prop.property.alias), minify=minify, exclude_name=exclude_name
+                    )
+                ]
+            else:
+                result[prop.property.alias] = prop.to_representation(
+                    context=context.create_child(prop.property.alias), minify=minify, exclude_name=exclude_name
+                )
+        return result
+
+    def _represent_artifacts(self, context: "Context", minify=True, exclude_name=True):
+        if not self.artifacts:
+            return {}
+        result = {}
+        for artifact in self.artifacts:
+            if artifact.artifact.alias in result:
+                if not artifact.artifact.value.allows_multiple:
+                    raise OntologyException(
+                        "Unexpected repeated artifact assignment", context=context.create_child(artifact.artifact.alias)
+                    )
+                result[artifact.artifact.alias].append(
+                    artifact.to_representation(
+                        context=context.create_child(artifact.artifact.alias), minify=minify, exclude_name=exclude_name
+                    )
+                )
+            elif artifact.artifact.value.allows_multiple:
+                result[artifact.artifact.alias] = [
+                    artifact.to_representation(
+                        context=context.create_child(artifact.artifact.alias), minify=minify, exclude_name=exclude_name
+                    )
+                ]
+            else:
+                result[artifact.artifact.alias] = artifact.to_representation(
+                    context=context.create_child(artifact.artifact.alias), minify=minify, exclude_name=exclude_name
+                )
+        return result

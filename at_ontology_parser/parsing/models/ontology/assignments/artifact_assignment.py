@@ -16,10 +16,10 @@ from at_ontology_parser.reference import OwnerFeatureReference
 
 
 def get_artifact_definition_from_type(
-    owner: Instance, ref: OwnerFeatureReference[ArtifactDefinition, Instance]
+    owner: ArtifactAssignment, ref: OwnerFeatureReference[ArtifactDefinition, Instance]
 ) -> ArtifactDefinition:
-    if owner._built and owner.type.fulfilled and owner.type.value._built:
-        return owner.type.value.artifacts.get(ref.alias)
+    if owner._built and owner.has_owner and isinstance(owner.owner, Instance) and owner.owner.type.fulfilled:
+        return owner.owner.type.value.artifacts.get(ref.alias)
 
 
 class PreliminaryArtifactDefinitionModel(OntoParseModel):
@@ -46,25 +46,33 @@ class ArtifactAssignmentModel(PreliminaryArtifactDefinitionModel):
 
 
 class ArtifactAssigments(
-    OntoRootModel[
-        List[Dict[str, str | PreliminaryArtifactDefinitionModel] | ArtifactAssignmentModel]
-        | Dict[str, PreliminaryArtifactDefinitionModel]
-    ]
+    OntoRootModel[Dict[str, List[PreliminaryArtifactDefinitionModel | str] | PreliminaryArtifactDefinitionModel | str]]
 ):
     def _to_internal(self, *, context: Context, owner: OntologyBase, **kwargs):
         result = []
         root = self.root
-        if isinstance(root, dict):
-            root = [{key: value} for key, value in root.items()]
-        for i, artifact_assignment in enumerate(root):
-            artifact_asgm = artifact_assignment
-            if not isinstance(artifact_assignment, ArtifactAssignmentModel):
-                artifact = next(iter(artifact_assignment.keys()))
-                path = artifact_assignment[artifact]
-                id = None
-                if isinstance(path, PreliminaryArtifactDefinitionModel):
-                    id = path.id
-                    path = path.path
-                artifact_asgm = ArtifactAssignmentModel(artifact=artifact, path=path, id=id)
-            result.append(artifact_asgm.to_internal(context=context.create_child(i, artifact_asgm), owner=owner))
+        for artifact, artifact_assignment in root.items():
+            if isinstance(artifact_assignment, list):
+                result += [
+                    self._get_art(artifact, assignment, context.create_child(i, assignment, self), owner)
+                    for i, assignment in enumerate(artifact_assignment)
+                ]
+            else:
+                result.append(self._get_art(artifact, artifact_assignment, context, owner))
         return result
+
+    def _get_art(
+        self,
+        artifact: str,
+        artifact_assignment: PreliminaryArtifactDefinitionModel | str,
+        context: Context,
+        owner: OntologyBase,
+    ):
+        if not isinstance(artifact_assignment, PreliminaryArtifactDefinitionModel):
+            return ArtifactAssignmentModel(artifact=artifact, path=artifact_assignment).to_internal(
+                context=context.create_child("artifact", artifact, self), owner=owner
+            )
+        else:
+            return ArtifactAssignmentModel(
+                artifact=artifact, id=artifact_assignment.id, path=artifact_assignment.path
+            ).to_internal(context=context.create_child("artifact", artifact, self), owner=owner)
