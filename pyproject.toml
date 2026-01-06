@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "at-ontology-parser"
-version = "0.1.2"
+version = "0.1.3"
 description = ""
 authors = ["grigadnal625 <grigandal625@gmail.com>"]
 readme = "README.md"

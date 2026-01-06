@@ -99,6 +99,21 @@ class OntologyEntity(OntologyBase):
 class Derivable(OntologyEntity):
     derived_from: "OntologyReference[Self]" = field(default=None)
 
+    @property
+    def derivation(self) -> list[Self]:
+        result = [self]
+
+        derived_from = self.derived_from
+
+        while derived_from and derived_from.fulfilled:
+            result = [derived_from.value] + result
+            derived_from = derived_from.value.derived_from
+        return result
+    
+    @property
+    def derivation_path(self) -> list[str]:
+        return [d.name for d in self.derivation]
+    
 
 @dataclass(kw_only=True)
 class Instancable(Derivable):
