@@ -24,7 +24,7 @@ class OntologyModel(OntologyEntity):
     schema_definitions: Optional[Dict[str, Any]] = field(default_factory=dict, repr=False)
 
     _resolved_imports: Optional[List[Tuple["ImportDefinition", "OntologyModel", "ModelModule"]]] = field(
-        init=False, default=None
+        init=False, default=None, repr=False
     )
 
     def get_resolved_import(
