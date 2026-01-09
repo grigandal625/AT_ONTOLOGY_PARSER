@@ -3,9 +3,10 @@ from typing import Dict
 from typing import Generic
 from typing import Optional
 from typing import TypeVar
+from uuid import uuid4
 
 from pydantic import BaseModel
-from pydantic import Field
+from pydantic import Field, field_serializer
 from pydantic import RootModel
 from pydantic import ValidationError
 
@@ -17,6 +18,11 @@ T = TypeVar("T")
 
 
 class OntoParseModel(BaseModel):
+    uuid: Optional[str] = Field(alias='_uuid', default_factory=lambda: str(uuid4()))
+    model_config = {
+        "populate_by_name": True,  # allows using Python names for initialization
+    }
+
     def to_internal(self, *, context: Context, owner: OntologyBase, **kwargs) -> OntologyBase:
         try:
             result = self._to_internal(context=context, owner=owner, **kwargs)
@@ -32,7 +38,7 @@ class OntoParseModel(BaseModel):
         return result
 
     def prepare_independent_data(self, *, context: Context, **kwargs) -> Dict[str, Any]:
-        data = self.model_dump()
+        data = self.model_dump(by_alias=True)
         data.update(kwargs)
         return data
 
