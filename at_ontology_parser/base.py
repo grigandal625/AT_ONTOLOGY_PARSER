@@ -25,7 +25,7 @@ class OntologyBase:
     owner: Optional["OntologyBase"] = field(default=None, init=False, repr=False)
     _built: bool = field(default=False, init=False, repr=False)
     _meta: Optional[dict] = field(default=None, init=False, repr=False)
-    _uuid: Optional[str] = field(init=False, repr=False, default_factory=uuid4)
+    _uuid: Optional[str] = field(repr=False, default_factory=uuid4, metadata={"restrict_repr": True})
 
     @property
     def has_owner(self):
@@ -33,7 +33,7 @@ class OntologyBase:
 
     @classmethod
     def public_fields(cls):
-        return {f.name: f for f in fields(cls) if f.init}
+        return {f.name: f for f in fields(cls) if f.init and not f.metadata.get('restrict_repr')}
 
     def create_context(
         self, name: str, data: Optional[Any] = None, parent: Optional[Context] = None, as_initiator: bool = True
