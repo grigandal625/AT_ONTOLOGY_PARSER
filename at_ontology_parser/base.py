@@ -34,6 +34,10 @@ class OntologyBase:
     @classmethod
     def public_fields(cls):
         return {f.name: f for f in fields(cls) if f.init and not f.metadata.get('restrict_repr')}
+    
+    @classmethod
+    def restricted_fields(cls):
+        return {f.name: f for f in fields(cls) if f.metadata.get('restrict_repr')}
 
     def create_context(
         self, name: str, data: Optional[Any] = None, parent: Optional[Context] = None, as_initiator: bool = True
@@ -44,12 +48,17 @@ class OntologyBase:
     def _including_empty_fields(self):
         return []
 
-    def to_representation(self, context: Context, minify=True, exclude_name=True) -> dict | str:
-        return self._to_repr(context=context, minify=minify, exclude_name=exclude_name)
+    def to_representation(self, context: Context, minify=True, exclude_name=True, with_restricted=False) -> dict | str:
+        return self._to_repr(context=context, minify=minify, exclude_name=exclude_name, with_restricted=with_restricted)
 
-    def _to_repr(self, context: Context, minify=True, exclude_name=True) -> dict | str:
+    def _to_repr(self, context: Context, minify=True, exclude_name=True, with_restricted=False) -> dict | str:
         res = {}
-        for f in self.public_fields().values():
+
+        entity_fields = self.public_fields().values()
+        if with_restricted:
+            entity_fields = list(entity_fields) + list(self.restricted_fields().values())
+
+        for f in entity_fields:
             if f.name == "name" and exclude_name:
                 continue
 
@@ -137,8 +146,8 @@ class Instance(OntologyEntity):
     properties: Optional[List["PropertyAssignment"]] = field(default=None, repr=False)
     artifacts: Optional[List["ArtifactAssignment"]] = field(default=None, repr=False)
 
-    def _to_repr(self, context: "Context", minify=True, exclude_name=True):
-        result = super()._to_repr(context, minify, exclude_name)
+    def _to_repr(self, context: "Context", minify=True, exclude_name=True, with_restricted=False):
+        result = super()._to_repr(context, minify, exclude_name, with_restricted=with_restricted)
 
         result["properties"] = self._represent_properties(
             context=context.create_child("properties"), minify=minify, exclude_name=exclude_name

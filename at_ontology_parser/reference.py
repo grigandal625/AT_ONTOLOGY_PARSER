@@ -56,7 +56,7 @@ class AbstractReference(OntologyBase):
     context: Context = field(repr=False)
     owner: Optional[OntologyBase] = field(init=False, default=None, repr=False)
 
-    def _to_repr(self, context: Context, minify=True, exclude_name=True) -> Dict | str:
+    def _to_repr(self, context: Context, minify=True, exclude_name=True, with_restricted=False) -> Dict | str:
         return self.alias
 
     @property

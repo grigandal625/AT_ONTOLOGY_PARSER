@@ -23,7 +23,6 @@ def get_property_definition_from_type(
 
 
 class PreliminaryPropertyAssignmentModel(OntoParseModel):
-    id: Optional[str | int] = Field(default=None)
     value: Any
 
 

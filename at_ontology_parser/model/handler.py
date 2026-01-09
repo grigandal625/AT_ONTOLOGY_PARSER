@@ -37,8 +37,8 @@ class OntologyModel(OntologyEntity):
                 else:
                     return resolved_import[1]
 
-    def _to_repr(self, context, minify=True, exclude_name=True):
-        result = super()._to_repr(context, minify, exclude_name)
+    def _to_repr(self, context, minify=True, exclude_name=True, with_restricted=False):
+        result = super()._to_repr(context, minify, exclude_name, with_restricted=with_restricted)
         result["name"] = self.name
 
         return result

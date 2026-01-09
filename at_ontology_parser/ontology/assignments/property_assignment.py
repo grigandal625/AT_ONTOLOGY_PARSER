@@ -15,14 +15,13 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class PropertyAssignment(OntologyBase):
-    id: str | int = field(default=None)
     property: "OwnerFeatureReference[PropertyDefinition, Instance]" = field(repr=False)
     value: Any = field(repr=False)
 
-    def _to_repr(self, context, minify=True, exclude_name=True):
-        if minify and not self.id:
+    def _to_repr(self, context, minify=True, exclude_name=True, with_restricted=False):
+        if minify and not with_restricted:
             return self.value
         return {
-            "id": self.id or str(uuid4()),
+            "_uuid": self._uuid,
             "value": self.value,
         }

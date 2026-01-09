@@ -10,7 +10,7 @@ class ImportDefinition(OntologyBase):
     file: str
     alias: Optional[str] = field(default=None)
 
-    def _to_repr(self, context, minify=True, exclude_name=True):
+    def _to_repr(self, context, minify=True, exclude_name=True, with_restricted=False):
         if self.alias:
             return {self.alias: self.file}
         return self.file

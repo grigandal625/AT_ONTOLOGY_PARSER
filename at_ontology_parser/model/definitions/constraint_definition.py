@@ -25,7 +25,7 @@ class ConstraintDefinition(Definition):
     def _check(self, value: Any) -> bool:
         raise NotImplementedError("Not implemented")
 
-    def _to_repr(self, context: "Context", minify: bool = True, exclude_name: bool = True):
+    def _to_repr(self, context: "Context", minify: bool = True, exclude_name: bool = True, with_restricted=False):
         return {self.name: self.args}
 
 

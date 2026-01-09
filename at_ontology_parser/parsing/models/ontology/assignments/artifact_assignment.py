@@ -23,7 +23,6 @@ def get_artifact_definition_from_type(
 
 
 class PreliminaryArtifactDefinitionModel(OntoParseModel):
-    id: Optional[str | int] = Field(default_factory=lambda: str(uuid4()))
     path: str
 
 

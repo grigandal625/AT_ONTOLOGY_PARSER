@@ -15,15 +15,14 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class ArtifactAssignment(OntologyBase):
-    id: str | int = field(default=None)
     artifact: "OwnerFeatureReference[ArtifactDefinition, Instance]" = field(repr=False)
     path: Optional[str] = field(default=None)
     # content: "IOBase" = field(repr=False, init=False)
 
-    def _to_repr(self, context, minify=True, exclude_name=True):
-        if minify and not self.id:
+    def _to_repr(self, context, minify=True, exclude_name=True, with_restricted=False):
+        if minify and not with_restricted:
             return self.path
         return {
-            "id": self.id,
+            "_uuid": self._uuid,
             "path": self.path,
         }
