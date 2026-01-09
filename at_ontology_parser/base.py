@@ -7,6 +7,7 @@ from typing import List
 from typing import Optional
 from typing import Self
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 from at_ontology_parser.exceptions import Context
 from at_ontology_parser.exceptions import OntologyException
@@ -24,6 +25,7 @@ class OntologyBase:
     owner: Optional["OntologyBase"] = field(default=None, init=False, repr=False)
     _built: bool = field(default=False, init=False, repr=False)
     _meta: Optional[dict] = field(default=None, init=False, repr=False)
+    _uuid: Optional[str] = field(init=False, repr=False, default_factory=uuid4)
 
     @property
     def has_owner(self):
