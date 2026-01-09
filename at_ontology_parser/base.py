@@ -97,7 +97,7 @@ class OntologyEntity(OntologyBase):
 
 @dataclass(kw_only=True)
 class Derivable(OntologyEntity):
-    derived_from: "OntologyReference[Self]" = field(default=None)
+    derived_from: "OntologyReference[Self]" = field(default=None, repr=False)
 
     @property
     def derivation(self) -> list[Self]:
@@ -117,9 +117,9 @@ class Derivable(OntologyEntity):
 
 @dataclass(kw_only=True)
 class Instancable(Derivable):
-    properties: Optional[Dict[str, "PropertyDefinition"]] = field(default_factory=dict)
-    artifacts: Optional[Dict[str, "ArtifactDefinition"]] = field(default_factory=dict)
-    metadata: Optional[dict] = field(default=None)
+    properties: Optional[Dict[str, "PropertyDefinition"]] = field(default_factory=dict, repr=False)
+    artifacts: Optional[Dict[str, "ArtifactDefinition"]] = field(default_factory=dict, repr=False)
+    metadata: Optional[dict] = field(default=None, repr=False)
 
 
 @dataclass(kw_only=True)
@@ -130,9 +130,9 @@ class Definition(OntologyEntity):
 @dataclass(kw_only=True)
 class Instance(OntologyEntity):
     type: "OntologyReference[Instancable]"
-    metadata: Optional[dict] = field(default=None)
-    properties: Optional[List["PropertyAssignment"]] = field(default=None)
-    artifacts: Optional[List["ArtifactAssignment"]] = field(default=None)
+    metadata: Optional[dict] = field(default=None, repr=False)
+    properties: Optional[List["PropertyAssignment"]] = field(default=None, repr=False)
+    artifacts: Optional[List["ArtifactAssignment"]] = field(default=None, repr=False)
 
     def _to_repr(self, context: "Context", minify=True, exclude_name=True):
         result = super()._to_repr(context, minify, exclude_name)

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class ArtifactAssignment(OntologyBase):
-    id: str | int = field(default_factory=lambda: str(uuid4()))
+    id: str | int = field(default=None)
     artifact: "OwnerFeatureReference[ArtifactDefinition, Instance]" = field(repr=False)
     path: Optional[str] = field(default=None)
     # content: "IOBase" = field(repr=False, init=False)

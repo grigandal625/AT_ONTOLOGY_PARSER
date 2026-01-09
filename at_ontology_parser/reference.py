@@ -52,8 +52,8 @@ def with_metaclass(meta):
 @dataclass(kw_only=True)
 class AbstractReference(OntologyBase):
     alias: str
-    value: Any = field(init=False, default=None)
-    context: Context
+    value: Any = field(init=False, default=None, repr=False)
+    context: Context = field(repr=False)
     owner: Optional[OntologyBase] = field(init=False, default=None, repr=False)
 
     def _to_repr(self, context: Context, minify=True, exclude_name=True) -> Dict | str:
@@ -81,8 +81,8 @@ class AbstractReference(OntologyBase):
 @dataclass(kw_only=True)
 class BaseReference(AbstractReference, Generic[T]):
     alias: str
-    value: Optional[T] = field(init=False, default=None)
-    context: Context
+    value: Optional[T] = field(init=False, default=None, repr=False)
+    context: Context = field(repr=False)
     owner: Optional[OntologyBase] = field(init=False, default=None, repr=False)
     _obj_generic_types: List[Type] = field(init=False, default=None, repr=False)
 
@@ -108,7 +108,7 @@ like {self.__class__.__name__}[VertexType] or {self.__class__.__name__}[Vertex |
 
 @dataclass(kw_only=True)
 class OntologyReference(BaseReference, Generic[T]):
-    value: Optional[T] = field(init=False, default=None)
+    value: Optional[T] = field(init=False, default=None, repr=False)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -140,7 +140,7 @@ def modify_owner_feature_ref_init(cls):
 @modify_owner_feature_ref_init
 @dataclass(kw_only=True)
 class OwnerFeatureReference(BaseReference, Generic[T, OWNER]):
-    value: Optional[T] = field(init=False, default=None)
+    value: Optional[T] = field(init=False, default=None, repr=False)
     __feature_getter__: Callable[[OWNER, Self], T] = field(init=False, default=None, repr=False)
 
     def __post_init__(self) -> None:
