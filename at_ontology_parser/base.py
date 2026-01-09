@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 class OntologyBase:
     owner: Optional["OntologyBase"] = field(default=None, init=False, repr=False)
     _built: bool = field(default=False, init=False, repr=False)
+    _meta: Optional[dict] = field(default=None, init=False, repr=False)
 
     @property
     def has_owner(self):

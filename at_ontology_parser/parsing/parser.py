@@ -48,7 +48,6 @@ class ModelModule(OntologyBase):
     parser: "Parser"
     artifacts: Dict[Path, io.IOBase] = field(init=False, repr=False, default_factory=dict)
     context: Context = field(repr=False)
-    _meta: Dict[str, Any] = field(init=False, repr=False, default_factory=dict)
 
     def resolve_imports(self, context: Context, import_loaders: List["ImportLoader"]):
         self.model.owner = self
@@ -84,7 +83,6 @@ class OntologyModule(OntologyBase):
     parser: "Parser"
     artifacts: Dict[Path, io.IOBase] = field(init=False, repr=False, default_factory=dict)
     context: Context = field(repr=False)
-    _meta: Dict[str, Any] = field(init=False, repr=False, default_factory=dict)
 
     def resolve_imports(self, context: Context, import_loaders: List["ImportLoader"]):
         self.ontology.owner = self
