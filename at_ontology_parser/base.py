@@ -25,7 +25,7 @@ class OntologyBase:
     owner: Optional["OntologyBase"] = field(default=None, init=False, repr=False)
     _built: bool = field(default=False, init=False, repr=False)
     _meta: Optional[dict] = field(default=None, init=False, repr=False)
-    _uuid: Optional[str] = field(repr=False, default_factory=uuid4, metadata={"restrict_repr": True})
+    _uuid: Optional[str] = field(repr=False, default_factory=lambda: str(uuid4()), metadata={"restrict_repr": True})
 
     @property
     def has_owner(self):
