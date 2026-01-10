@@ -27,7 +27,7 @@ class PreliminaryPropertyAssignmentModel(OntoParseModel):
 
 
 class PropertyAssignmentModel(PreliminaryPropertyAssignmentModel):
-    property: str
+    definition: str
 
     def get_preliminary_object(self, data, *, context: Context, owner: OntologyBase):
         result = PropertyAssignment(**data)
@@ -35,11 +35,11 @@ class PropertyAssignmentModel(PreliminaryPropertyAssignmentModel):
         return result
 
     def insert_dependent_data(self, result: PropertyAssignment, context: Context):
-        result.property = OwnerFeatureReference[PropertyDefinition, Instance].create(
-            self.property,
+        result.definition = OwnerFeatureReference[PropertyDefinition, Instance].create(
+            self.definition,
             context=context.create_child(
-                self.property,
-                self.property,
+                self.definition,
+                self.definition,
                 initiator=result,
             ),
             feature_getter=get_property_definition_from_type,
@@ -54,10 +54,10 @@ class PropertyAssignments(
     def _to_internal(self, *, context: Context, owner: OntologyBase, **kwargs) -> List[PropertyAssignment]:
         result = []
         root = self.root
-        for property, prop_assignment in root.items():
+        for definition, prop_assignment in root.items():
             if isinstance(prop_assignment, list):
                 result += [
-                    self._get_prop(property, assignment, context.create_child(i, assignment, self), owner)
+                    self._get_prop(definition, assignment, context.create_child(i, assignment, self), owner)
                     for i, assignment in enumerate(prop_assignment)
                 ]
             else:
@@ -66,20 +66,20 @@ class PropertyAssignments(
 
     def _get_prop(
         self,
-        property: str,
+        definition: str,
         prop_assignment: PreliminaryPropertyAssignmentModel | Any,
         context: Context,
         owner: OntologyBase,
     ) -> PropertyAssignment:
         if not isinstance(prop_assignment, PreliminaryPropertyAssignmentModel):
-            return PropertyAssignmentModel(property=property, value=prop_assignment).to_internal(
-                context=context.create_child(property, prop_assignment, initiator=self),
+            return PropertyAssignmentModel(definition=definition, value=prop_assignment).to_internal(
+                context=context.create_child(definition, prop_assignment, initiator=self),
                 owner=owner,
             )
         else:
             return PropertyAssignmentModel(
-                property=property, value=prop_assignment.value, id=prop_assignment.id
+                definition=definition, value=prop_assignment.value
             ).to_internal(
-                context=context.create_child(property, prop_assignment, initiator=self),
+                context=context.create_child(definition, prop_assignment, initiator=self),
                 owner=owner,
             )

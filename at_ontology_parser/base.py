@@ -163,25 +163,25 @@ class Instance(OntologyEntity):
         result = {}
 
         for prop in self.properties:
-            if prop.property.alias in result:
-                if not prop.property.value.allows_multiple:
+            if prop.definition.alias in result:
+                if not prop.definition.value.allows_multiple:
                     raise OntologyException(
-                        "Unexpected repeated property assignment", context=context.create_child(prop.property.alias)
+                        "Unexpected repeated property assignment", context=context.create_child(prop.definition.alias)
                     )
-                result[prop.property.alias].append(
+                result[prop.definition.alias].append(
                     prop.to_representation(
-                        context=context.create_child(prop.property.alias), minify=minify, exclude_name=exclude_name
+                        context=context.create_child(prop.definition.alias), minify=minify, exclude_name=exclude_name
                     )
                 )
-            elif prop.property.value.allows_multiple:
-                result[prop.property.alias] = [
+            elif prop.definition.value.allows_multiple:
+                result[prop.definition.alias] = [
                     prop.to_representation(
-                        context=context.create_child(prop.property.alias), minify=minify, exclude_name=exclude_name
+                        context=context.create_child(prop.definition.alias), minify=minify, exclude_name=exclude_name
                     )
                 ]
             else:
-                result[prop.property.alias] = prop.to_representation(
-                    context=context.create_child(prop.property.alias), minify=minify, exclude_name=exclude_name
+                result[prop.definition.alias] = prop.to_representation(
+                    context=context.create_child(prop.definition.alias), minify=minify, exclude_name=exclude_name
                 )
         return result
 
@@ -190,24 +190,24 @@ class Instance(OntologyEntity):
             return {}
         result = {}
         for artifact in self.artifacts:
-            if artifact.artifact.alias in result:
-                if not artifact.artifact.value.allows_multiple:
+            if artifact.definition.alias in result:
+                if not artifact.definition.value.allows_multiple:
                     raise OntologyException(
-                        "Unexpected repeated artifact assignment", context=context.create_child(artifact.artifact.alias)
+                        "Unexpected repeated artifact assignment", context=context.create_child(artifact.definition.alias)
                     )
-                result[artifact.artifact.alias].append(
+                result[artifact.definition.alias].append(
                     artifact.to_representation(
-                        context=context.create_child(artifact.artifact.alias), minify=minify, exclude_name=exclude_name
+                        context=context.create_child(artifact.definition.alias), minify=minify, exclude_name=exclude_name
                     )
                 )
-            elif artifact.artifact.value.allows_multiple:
-                result[artifact.artifact.alias] = [
+            elif artifact.definition.value.allows_multiple:
+                result[artifact.definition.alias] = [
                     artifact.to_representation(
-                        context=context.create_child(artifact.artifact.alias), minify=minify, exclude_name=exclude_name
+                        context=context.create_child(artifact.definition.alias), minify=minify, exclude_name=exclude_name
                     )
                 ]
             else:
-                result[artifact.artifact.alias] = artifact.to_representation(
-                    context=context.create_child(artifact.artifact.alias), minify=minify, exclude_name=exclude_name
+                result[artifact.definition.alias] = artifact.to_representation(
+                    context=context.create_child(artifact.definition.alias), minify=minify, exclude_name=exclude_name
                 )
         return result

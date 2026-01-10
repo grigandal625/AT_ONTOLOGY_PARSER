@@ -27,7 +27,7 @@ class PreliminaryArtifactDefinitionModel(OntoParseModel):
 
 
 class ArtifactAssignmentModel(PreliminaryArtifactDefinitionModel):
-    artifact: str
+    definition: str
 
     def get_preliminary_object(self, data, *, context: Context, owner: OntologyBase):
         result = ArtifactAssignment(**data)
@@ -35,9 +35,9 @@ class ArtifactAssignmentModel(PreliminaryArtifactDefinitionModel):
         return result
 
     def insert_dependent_data(self, result: ArtifactAssignment, context: Context):
-        result.artifact = OwnerFeatureReference[ArtifactDefinition, Instance].create(
-            alias=self.artifact,
-            context=context.create_child("artifact", result.artifact, result),
+        result.definition = OwnerFeatureReference[ArtifactDefinition, Instance].create(
+            alias=self.definition,
+            context=context.create_child("artifact", result.definition, result),
             feature_getter=get_artifact_definition_from_type,
             owner=result,
         )
@@ -50,28 +50,28 @@ class ArtifactAssigments(
     def _to_internal(self, *, context: Context, owner: OntologyBase, **kwargs):
         result = []
         root = self.root
-        for artifact, artifact_assignment in root.items():
+        for definition, artifact_assignment in root.items():
             if isinstance(artifact_assignment, list):
                 result += [
-                    self._get_art(artifact, assignment, context.create_child(i, assignment, self), owner)
+                    self._get_art(definition, assignment, context.create_child(i, assignment, self), owner)
                     for i, assignment in enumerate(artifact_assignment)
                 ]
             else:
-                result.append(self._get_art(artifact, artifact_assignment, context, owner))
+                result.append(self._get_art(definition, artifact_assignment, context, owner))
         return result
 
     def _get_art(
         self,
-        artifact: str,
+        definition: str,
         artifact_assignment: PreliminaryArtifactDefinitionModel | str,
         context: Context,
         owner: OntologyBase,
     ):
         if not isinstance(artifact_assignment, PreliminaryArtifactDefinitionModel):
-            return ArtifactAssignmentModel(artifact=artifact, path=artifact_assignment).to_internal(
-                context=context.create_child("artifact", artifact, self), owner=owner
+            return ArtifactAssignmentModel(definition=definition, path=artifact_assignment).to_internal(
+                context=context.create_child("artifact", definition, self), owner=owner
             )
         else:
             return ArtifactAssignmentModel(
-                artifact=artifact, id=artifact_assignment.id, path=artifact_assignment.path
-            ).to_internal(context=context.create_child("artifact", artifact, self), owner=owner)
+                definition=definition, path=artifact_assignment.path
+            ).to_internal(context=context.create_child("artifact", definition, self), owner=owner)

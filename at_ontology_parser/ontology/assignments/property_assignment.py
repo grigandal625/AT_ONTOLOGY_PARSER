@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class PropertyAssignment(OntologyBase):
-    property: "OwnerFeatureReference[PropertyDefinition, Instance]" = field(repr=False)
+    definition: "OwnerFeatureReference[PropertyDefinition, Instance]" = field(repr=False)
     value: Any = field(repr=False)
 
     def _to_repr(self, context, minify=True, exclude_name=True, with_restricted=False):

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class ArtifactAssignment(OntologyBase):
-    artifact: "OwnerFeatureReference[ArtifactDefinition, Instance]" = field(repr=False)
+    definition: "OwnerFeatureReference[ArtifactDefinition, Instance]" = field(repr=False)
     path: Optional[str] = field(default=None)
     # content: "IOBase" = field(repr=False, init=False)
 
