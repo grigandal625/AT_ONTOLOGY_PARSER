@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class DataType(Derivable):
     constraints: Optional[List["ConstraintDefinition"]] = field(default_factory=list, repr=False)
     object_schema: Optional[dict | str] = field(default=None, repr=False)
-    object_schema_resolved: Optional[str] = field(default=None, init=False, repr=False)
+    object_schema_resolved: Optional[dict] = field(default=None, init=False, repr=False)
 
     @property
     def object_schema_ref_used(self) -> bool:
