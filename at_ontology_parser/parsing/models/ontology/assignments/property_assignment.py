@@ -61,7 +61,7 @@ class PropertyAssignments(
                     for i, assignment in enumerate(prop_assignment)
                 ]
             else:
-                result.append(self._get_prop(property, prop_assignment, context, owner))
+                result.append(self._get_prop(definition, prop_assignment, context, owner))
         return result
 
     def _get_prop(
