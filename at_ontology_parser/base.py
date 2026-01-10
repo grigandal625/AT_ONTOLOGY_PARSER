@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 class OntologyBase:
     owner: Optional["OntologyBase"] = field(default=None, init=False, repr=False)
     _built: bool = field(default=False, init=False, repr=False)
-    _meta: Optional[dict] = field(default=dict, init=False, repr=False)
+    _meta: Optional[dict] = field(default_factory=dict, init=False, repr=False)
     _uuid: Optional[str] = field(repr=False, default_factory=lambda: str(uuid4()), metadata={"restrict_repr": True})
 
     @property
