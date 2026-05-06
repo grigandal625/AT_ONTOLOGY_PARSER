@@ -290,7 +290,7 @@ class Parser(OntologyBase):
                         errors=["Expected orig_name provided while loading from IOBase"],
                     )
             if not isinstance(full_path, io.IOBase):
-                with open(full_path, "r") as file:
+                with open(full_path, "r", encoding="utf-8") as file:
                     data = yaml.safe_load(file)
             else:
                 full_path.seek(0)
@@ -365,7 +365,7 @@ class Parser(OntologyBase):
                         errors=["Expected orig_name provided while loading from IOBase"],
                     )
             if not isinstance(full_path, io.IOBase):
-                with open(full_path, "r") as file:
+                with open(full_path, "r", encoding="utf-8") as file:
                     data = yaml.safe_load(file)
             else:
                 full_path.seek(0)
